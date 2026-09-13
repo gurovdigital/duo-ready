@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Замер вьюпорта</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        background: #f8f5ed;
+        color: #2f3d40;
+        font: 500 15px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+        padding-bottom: 3rem;
+      }
+
+      /* A fixed bar exactly like the site's, so one screenshot shows both the
+         numbers and whether the bar leaks. */
+      .bar {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 10;
+        min-height: calc(3.6rem + env(safe-area-inset-top, 0px));
+        padding-top: env(safe-area-inset-top, 0px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #3f6486;
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+
+      /* Absolutely positioned at document y=0. If you can see this stripe, the
+         page starts above the bar. */
+      .zero {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: repeating-linear-gradient(90deg, #e8836b 0 12px, #2f3d40 12px 24px);
+        z-index: 20;
+      }
+
+      /* The horizontal centre of the viewport. On an opened iPhone Duo it should
+         fall exactly on the physical crease - a photo of the two proves the
+         geometry the site's fold rules assume. */
+      .mid {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        border-left: 2px dashed #e8836b;
+        z-index: 30;
+        pointer-events: none;
+      }
+
+      main { padding: calc(3.6rem + env(safe-area-inset-top, 0px) + 1rem) 1rem 0; }
+
+      /* ?pos=sticky - the candidate fix: the bar lives in the scroll layer instead of
+         the fixed layer, so a host that moves the web view's frame mid-scroll has no
+         separate layer to leave behind. In flow, so main needs no top clearance. */
+      .bar.is-sticky { position: sticky; }
+      body.is-sticky main { padding-top: 1rem; }
+
+      h1 { margin: 0 0 0.2rem; font-size: 1rem; letter-spacing: -0.01em; }
+      p.sub { margin: 0 0 1rem; font-size: 0.8rem; opacity: 0.6; }
+
+      table { width: 100%; border-collapse: collapse; }
+      td { padding: 0.34rem 0; border-bottom: 1px solid #ded3bd; vertical-align: top; }
+      td:first-child { padding-right: 0.6rem; opacity: 0.62; }
+      td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+      tr.hot td:last-child { color: #c0442a; }
+
+      .grp { margin-top: 1.3rem; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.55; }
+      .tall { height: 180vh; }
+    </style>
+  </head>
+  <body>
+    <span class="zero"></span>
+    <span class="mid"></span>
+    <div class="bar" id="bar">FIXED BAR</div>
+
+    <main>
+      <h1>Замер вьюпорта</h1>
+      <p class="sub">Полосатая линия - верх документа. Пунктир - центр экрана: на раскрытом Duo он должен лечь ровно на сгиб</p>
+
+      <div class="grp">Safe area (env)</div>
+      <table id="t1"></table>
+
+      <div class="grp">Фиксированная шапка</div>
+      <table id="t2"></table>
+
+      <div class="grp">Вьюпорт</div>
+      <table id="t3"></table>
+
+      <div class="grp">Окружение</div>
+      <table id="t4"></table>
+
+      <div class="tall"></div>
+    </main>
+
+    <script src="vp.js"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "gurovdigital",
+  "owner": {
+    "name": "Pavel Gurov",
+    "url": "https://gurovdigital.com"
+  },
+  "plugins": [
+    {
+      "name": "fold-audit",
+      "source": "./plugins/fold-audit",
+      "description": "Audit and fix a website for book-style foldable phones, iPhone Duo first: no control on the crease, no sideways scroll, plus device mockups with the crease drawn in"
+    }
+  ]
+}

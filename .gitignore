@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+fold-audit-report/
+*.png
+!docs/*.png
