@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* fold-audit - find the tap targets a foldable's crease will swallow.
+/* duo-check - read a website at every iPhone Duo pose.
  *
  * Opens each URL in headless Chrome at every pose of a book-style foldable
  * (iPhone Duo sizes by default), with touch input emulated, scrolls the whole
@@ -9,8 +9,8 @@
  *   - pages that scroll sideways at any pose
  *
  * Usage:
- *   node fold-audit.mjs https://example.com [https://example.com/pricing ...]
- *   node fold-audit.mjs https://example.com --out ./report --shots
+ *   node duo-check.mjs https://example.com [https://example.com/pricing ...]
+ *   node duo-check.mjs https://example.com --out ./report --shots
  *
  * Exit code 1 when any crease hit or sideways scroll is found, so it can gate
  * a deploy. Needs Node 22+ (built-in WebSocket) and Google Chrome.
@@ -27,20 +27,22 @@ const POSES = [
   ['closed-portrait', 466, 678, false],
   ['closed-landscape', 678, 466, false],
   // Apple's spec sheet panel implies 626 x 890 points opened; App Store
-  // Connect's screenshot size implies 669 x 951. Audit both until one is
+  // Connect's screenshot size implies 669 x 951. Check both until one is
   // confirmed on the device.
   ['open-890', 890, 626, true],
   ['open-951', 951, 669, true],
+  // The inner screen ignores orientation; turned, the crease runs across.
+  ['open-turned', 669, 951, false],
   ['split-view', 475, 669, false],
 ];
 const NARROW = 240;
 
 const args = process.argv.slice(2);
 const urls = args.filter((a) => /^https?:\/\//.test(a));
-const outDir = args.includes('--out') ? args[args.indexOf('--out') + 1] : './fold-audit-report';
+const outDir = args.includes('--out') ? args[args.indexOf('--out') + 1] : './duo-report';
 const withShots = args.includes('--shots');
 if (!urls.length) {
-  console.error('Usage: node fold-audit.mjs <url> [url ...] [--out dir] [--shots]');
+  console.error('Usage: node duo-check.mjs <url> [url ...] [--out dir] [--shots]');
   process.exit(2);
 }
 fs.mkdirSync(outDir, { recursive: true });
@@ -69,7 +71,7 @@ const getJSON = (u) =>
     http.get(u, (r) => { let d = ''; r.on('data', (c) => (d += c)); r.on('end', () => { try { res(JSON.parse(d)); } catch (e) { rej(e); } }); }).on('error', rej));
 
 const port = 9222 + Math.floor(Math.random() * 500);
-const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'fold-audit-'));
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'duo-check-'));
 const chrome = spawn(findChrome(), [
   '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check',
   '--remote-allow-origins=*', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, 'about:blank',
@@ -123,7 +125,7 @@ for (const url of urls) {
     await S('Page.enable');
     await S('Page.navigate', { url });
     await sleep(6000);
-    // Walk the page so lazy sections render; the crease audit then sees them all.
+    // Walk the page so lazy sections render; the crease check then sees them all.
     const h = (await S('Runtime.evaluate', { expression: 'document.scrollingElement.scrollHeight', returnByValue: true })).result?.value || H;
     for (let y = 0, n = 0; y < h && n < 60; y += Math.round(H * 0.8), n++) {
       await S('Runtime.evaluate', { expression: `document.documentElement.style.scrollBehavior='auto';scrollTo(0,${y})` });
@@ -153,9 +155,9 @@ for (const url of urls) {
   }
 }
 
-fs.writeFileSync(path.join(outDir, 'fold-audit.json'), JSON.stringify(results, null, 2));
+fs.writeFileSync(path.join(outDir, 'duo-report.json'), JSON.stringify(results, null, 2));
 
-const md = ['# Fold audit', '', `Audited ${new Date().toISOString().slice(0, 10)} in headless Chrome with touch input emulated. Emulation, not the device: confirm on hardware before you publish a verdict.`, ''];
+const md = ['# Duo-ready check', '', `Checked ${new Date().toISOString().slice(0, 10)} in headless Chrome with touch input emulated. Emulation, not the device: confirm on hardware before you publish a verdict.`, ''];
 const failing = results.filter((r) => r.hits.length || r.sideways);
 md.push(failing.length ? `**${failing.length} pose(s) need work.**` : '**No crease hits and no sideways scrolling at any pose.**', '');
 for (const url of urls) {
@@ -168,7 +170,7 @@ for (const url of urls) {
     md.push('');
   }
 }
-fs.writeFileSync(path.join(outDir, 'fold-audit.md'), md.join('\n'));
-console.log(`\nReport: ${path.join(outDir, 'fold-audit.md')}`);
+fs.writeFileSync(path.join(outDir, 'duo-report.md'), md.join('\n'));
+console.log(`\nReport: ${path.join(outDir, 'duo-report.md')}`);
 shutdown();
 process.exit(failing.length ? 1 : 0);

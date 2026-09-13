@@ -1,13 +1,13 @@
 ---
-name: fold-audit
-description: Audit and fix a website for book-style foldable phones, iPhone Duo first, so no button, link or form field sits on the crease and no page scrolls sideways at any pose. Use when someone asks to make a site "ready for iPhone Duo" or "foldable-ready", to check a landing page or checkout on a folding phone, or asks why taps fail in the middle of a foldable's screen. Also renders device mockups with the crease drawn in, for client reports, before-and-after case studies and social posts.
+name: duo-ready
+description: Make a website look its best on iPhone Duo, Apple's book-style foldable - closed, opened, turned, in Split View and in the in-app browsers people open links from. Use when someone asks to make a site "ready for iPhone Duo", "foldable-ready" or "look great on the new foldable iPhone", to check a landing page, shop or checkout on the opened screen, or asks why taps fail in the middle of a foldable's screen. Reads pages at every pose, keeps every control off the crease with one isolated block of CSS, handles the side Dynamic Island and in-app browsers, and renders device mockups for client reports and posts.
 ---
 
-# Fold audit
+# Duo-ready
 
 A book-style foldable opens into a nearly square screen with a crease down the
 middle. Taps on the crease register badly, so any small control that straddles
-the centre line is a lost click. This skill finds those controls, moves them
+the centre line is a lost click. This skill reads the site at every pose, finds those controls, moves them
 with the smallest possible CSS change, proves the fix, and draws the picture
 that shows a client why it mattered.
 
@@ -15,7 +15,7 @@ that shows a client why it mattered.
 
 - **Geometry.** iPhone Duo opened is 951 x 669 points by App Store Connect's
   screenshot size, or 890 x 626 by the spec sheet's panel resolution. Until the
-  device settles it, audit both. Closed, it is 466 x 678. The crease is the
+  device settles it, check both. Closed, it is 466 x 678. The crease is the
   horizontal centre of the opened screen.
 - **No web API.** As of Safari 27, WebKit ships neither the Viewport Segments API
   nor the Device Posture API. A page cannot ask where the fold is; it has to
@@ -23,27 +23,27 @@ that shows a client why it mattered.
 - **Apple's rule.** Scrolling content - articles, feeds, long rows - may cross the
   crease. Controls must not.
 
-Details and sources: `references/fold-geometry.md`.
+Details and sources: `references/duo-geometry.md`.
 
 ## Workflow
 
-### 1. Audit
+### 1. Read the site at every pose
 
 ```bash
-node scripts/fold-audit.mjs https://example.com https://example.com/pricing --out fold-audit-report --shots
+node scripts/duo-check.mjs https://example.com https://example.com/pricing --out duo-report --shots
 ```
 
 Needs Node 22+ and Google Chrome (`CHROME_PATH` overrides). It opens every URL at
-five poses with touch input emulated, scrolls the whole page so lazy sections
-load, and writes `fold-audit.md`, `fold-audit.json` and, with `--shots`, one
+six poses with touch input emulated, scrolls the whole page so lazy sections
+load, and writes `duo-report.md`, `duo-report.json` and, with `--shots`, one
 screenshot per hit with the centre line dashed in. Exit code 1 means work to do.
 
-Audit every template that carries controls: home, a product or pricing page, the
+Read every template that carries controls: home, a product or pricing page, the
 checkout or signup flow, a blog post.
 
 ### 2. Triage
 
-Read `fold-audit.md` and sort each finding:
+Read `duo-report.md` and sort each finding:
 
 | Finding | Action |
 |---|---|
@@ -81,9 +81,14 @@ Prefer moves that hold at any width over caps tuned to one:
 
 Do not hide content, shrink tap targets, or change anything outside the block.
 
+One rule outside it, for the closed screen: the Dynamic Island stands on one side
+there, so left and right safe areas differ. With `viewport-fit=cover`, give
+full-bleed fixed bars `padding-left: env(safe-area-inset-left, 0px)` and the
+right-hand equivalent, written inline rather than through a custom property.
+
 ### 4. Verify
 
-Run the audit again. The bar is **zero narrow controls on the crease at both
+Run the check again. The bar is **zero narrow controls on the crease at both
 `open-890` and `open-951`, and no sideways scroll at any pose.** A fix that holds
 at one width and not the other is not done.
 
@@ -114,7 +119,7 @@ the centre and the physical crease coincide.
 
 ### 7. Report honestly
 
-State that the audit ran in emulation, which widths were checked, and that the
+State that the checks ran in emulation, which widths were checked, and that the
 result should be confirmed on the device. Name the date. When the Viewport
 Segments or Device Posture API ships in Safari, replace the width range with a
 real query and delete the guesswork.

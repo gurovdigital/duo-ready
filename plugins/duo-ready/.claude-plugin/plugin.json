@@ -1,0 +1,20 @@
+{
+  "name": "duo-ready",
+  "description": "Make your website look its best on iPhone Duo: every pose checked, every control off the crease, in-app browsers handled, device mockups drawn",
+  "version": "1.1.0",
+  "author": {
+    "name": "Pavel Gurov",
+    "url": "https://gurovdigital.com"
+  },
+  "homepage": "https://gurovdigital.com/skills",
+  "repository": "https://github.com/gurovdigital/duo-ready",
+  "license": "MIT",
+  "keywords": [
+    "iphone-duo",
+    "foldable",
+    "responsive-design",
+    "css",
+    "mobile-web",
+    "claude-skill"
+  ]
+}

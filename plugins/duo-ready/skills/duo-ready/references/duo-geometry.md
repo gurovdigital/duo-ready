@@ -1,4 +1,4 @@
-# Fold geometry and the evidence behind it
+# iPhone Duo geometry and the evidence behind it
 
 Collected 11-13 September 2026, two to four days after Apple announced iPhone Duo.
 Recheck when Xcode 27.1 ships the iPhone Duo simulator and when Safari 27.1 ships.
@@ -16,7 +16,7 @@ Recheck when Xcode 27.1 ships the iPhone Duo simulator and when Safari 27.1 ship
   with iOS 27.1. From $1,999; from €2,299 in Germany.
 - The two opened sizes disagree. App Store Connect asks for 2007 x 2853 px inner
   screenshots, which is 669 x 951 points at 3x; the spec sheet panel gives 626 x
-  890. Audit both until a device or Apple's simulator settles it.
+  890. Check both until a device or Apple's simulator settles it.
 - The fold is book-style: the closed width (466) roughly doubles when opened, so
   the crease sits at the centre of the opened width.
 - On the outer display the Dynamic Island stands vertically along one side, so
