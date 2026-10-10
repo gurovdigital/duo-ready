@@ -161,7 +161,7 @@ The fixed scripts were run for real on 10 October 2026 with Node.js 25.9.0 and G
 | 15 | Page that blocks the browser for ever | Every pose "not checked: Chrome did not answer in time", exit code 1, and the run of six poses ended after about 220 seconds. |
 | 16 | Chrome's own traffic: Chrome started by hand for 30 seconds on an empty page, once with the flags of 1.1.0 and once with the flags of 1.2.0, measured with Chrome's network log | 34 requests to 14 Google host names with the flags of 1.1.0, and 12 requests to 7 Google host names with the flags of 1.2.0. |
 
-After every test, the number of Chrome processes and of profile folders left by the scripts was counted, and it was 0 each time.
+After every test, the number of Chrome processes and of profile folders of the scripts was counted. The count was 0 every time but one: right after the four-page run of tests 7 and 9 it showed 9 Chrome processes and 1 profile folder, and both were gone at the next count. At that moment another run of `duo-check.cjs` was active on the same computer, started outside these tests, and the count cannot tell the two runs apart. The four-page run was then repeated alone, with counts from 0 to 10 seconds after its end, and every count was 0.
 
 Two things from the tests are worth saying plainly. Test 10 shows what stays of F1: a short text from a hostile page does reach the report. Test 16 shows what stays of F7: Chrome still talks to Google servers by itself (for example an update check, a device check-in, a time check and an account check), and the flags do not stop this.
 
