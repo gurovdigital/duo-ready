@@ -1,0 +1,27 @@
+# Static analysis of the skill's scripts on every change and once a week.
+# CodeQL runs next to it through GitHub's default code scanning setup.
+
+name: Semgrep
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: >
+          semgrep scan --metrics=off --error
+          --config p/javascript --config p/nodejs --config p/security-audit
+          --config p/secrets --config p/owasp-top-ten
+          plugins/duo-ready/skills/duo-ready

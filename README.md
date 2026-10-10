@@ -46,8 +46,8 @@ Then ask Claude to "get example.com ready for iPhone Duo".
 **Without Claude:** the scripts run on their own.
 
 ```
-node plugins/duo-ready/skills/duo-ready/scripts/duo-check.mjs https://example.com --shots
-node plugins/duo-ready/skills/duo-ready/scripts/duo-mockup.mjs https://example.com --scroll ".pricing"
+node plugins/duo-ready/skills/duo-ready/scripts/duo-check.cjs 'https://example.com' --shots
+node plugins/duo-ready/skills/duo-ready/scripts/duo-mockup.cjs 'https://example.com' --scroll '.pricing'
 ```
 
 Requirements: Node 22 or newer and Google Chrome.

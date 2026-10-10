@@ -1,0 +1,62 @@
+# Builds the .skill file from a version tag, signs it and publishes the release.
+#
+# The archive is built with fixed timestamps and a sorted file list, so the
+# same commit always gives the same bytes and the same SHA-256 checksum. The
+# signature is keyless Sigstore: the certificate names this workflow and this
+# tag, and the signing event is written to the public Rekor transparency log.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build duo-ready.skill
+        run: |
+          cd plugins/duo-ready/skills
+          find duo-ready -exec touch -h -d "2026-01-01T00:00:00Z" {} +
+          find duo-ready -type f | LC_ALL=C sort | TZ=UTC zip -X -q "$GITHUB_WORKSPACE/duo-ready.skill" -@
+          cd "$GITHUB_WORKSPACE"
+          unzip -l duo-ready.skill
+          sha256sum duo-ready.skill | tee duo-ready.skill.sha256
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Sign with Sigstore
+        run: cosign sign-blob --yes --bundle duo-ready.skill.sigstore.json duo-ready.skill
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: duo-ready.skill
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "The skill as one file: \`duo-ready.skill\`."
+            echo
+            echo "SHA-256: \`$(cut -d' ' -f1 duo-ready.skill.sha256)\`"
+            echo
+            echo "Verify the signature:"
+            echo
+            echo '```bash'
+            echo "cosign verify-blob duo-ready.skill --bundle duo-ready.skill.sigstore.json --certificate-identity-regexp '^https://github.com/gurovdigital/duo-ready/' --certificate-oidc-issuer https://token.actions.githubusercontent.com"
+            echo '```'
+            echo
+            echo "Security review: [SECURITY-REVIEW.md](https://github.com/gurovdigital/duo-ready/blob/main/SECURITY-REVIEW.md)"
+          } > notes.md
+          gh release create "$GITHUB_REF_NAME" duo-ready.skill duo-ready.skill.sha256 duo-ready.skill.sigstore.json \
+            --title "Duo-ready ${GITHUB_REF_NAME#v}" --notes-file notes.md --verify-tag
